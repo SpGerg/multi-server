@@ -1,0 +1,1 @@
+bool create_directory(const char* directory);
