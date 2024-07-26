@@ -5,6 +5,7 @@
 #include "server.h"
 #include "..\logger\enums\color.h"
 #include "..\logger\logger.h"
+#include "..\utilities.h"
 
 typedef struct server {
     const char* id;
@@ -36,6 +37,9 @@ server* server_create(const char* id, unsigned int port) {
     strcat(logsDirectory, directory);
     strcat(logsDirectory, "\\servers\\");
     strcat(logsDirectory, id);
+
+    utilities_create_directories(logsDirectory);
+
     strcat(logsDirectory, "\\");
     strcat(logsDirectory, "logs");
 

@@ -135,8 +135,9 @@ logger* logger_create(const char* tag, const char* directory) {
     instance->directory = directory_with_log_file;
     instance->file = fopen(instance->directory, "a");
 
-    if (!instance->file) {
-        printf("e");
+    if (instance->file == NULL) {
+        printf(RED "Error with creating log file");
+        printf(STANDART);
     }
 
     free(time);

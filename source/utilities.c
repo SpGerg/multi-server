@@ -4,6 +4,10 @@
 #include "utilities.h"
 
 void utilities_create_directories(const char* directory) {
+    if (CreateDirectory(directory, NULL) == FALSE || GetLastError() == ERROR_ALREADY_EXISTS) {
+        return;
+    }
+
     int index = 0;
     char* copy = calloc(strlen(directory), sizeof(char));
 
