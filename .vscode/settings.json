@@ -63,6 +63,10 @@
     "config.h": "c",
     "intenty.h": "c",
     "logger.h": "c",
-    "shobjidl.h": "c"
+    "shobjidl.h": "c",
+    "stdio.h": "c",
+    "stat.h": "c",
+    "errno.h": "c",
+    "utilities.h": "c"
   }
 }

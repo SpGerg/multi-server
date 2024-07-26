@@ -3,13 +3,11 @@
 #include <windows.h>
 #include <time.h>
 #include <string.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
+#include "..\utilities.h"
 #include "logger.h"
 #include "enums/color.h"
 
-#define TIME_FILE_FORMAT_SIZE 128
+#define STRING_TIME_SIZE 128
 
 typedef struct logger {
     const char* tag;
@@ -22,8 +20,8 @@ time_t get_current_time() {
     return time(NULL);
 }
 
-char* get_logs_file_name(time_t time) {
-    char* time_string = calloc(TIME_FILE_FORMAT_SIZE, sizeof(char));
+char* get_logs_folder_name(time_t time) {
+    char* time_string = calloc(STRING_TIME_SIZE, sizeof(char));
 
     if (time_string == NULL) {
         printf(RED "Not enough memory to create the log file name.");
@@ -34,13 +32,30 @@ char* get_logs_file_name(time_t time) {
 
     struct tm* time_info = gmtime(&time);
 
-    strftime(time_string, TIME_FILE_FORMAT_SIZE, "%Y_%m_%d_%H_%M_%S", time_info);
+    strftime(time_string, STRING_TIME_SIZE, "%Y_%m_%d", time_info);
+
+    return time_string;
+}
+
+char* get_logs_file_name(time_t time) {
+    char* time_string = calloc(STRING_TIME_SIZE, sizeof(char));
+
+    if (time_string == NULL) {
+        printf(RED "Not enough memory to create the log file name.");
+        printf(STANDART);
+
+        return NULL;
+    }
+
+    struct tm* time_info = gmtime(&time);
+
+    strftime(time_string, STRING_TIME_SIZE, "%Y_%m_%d_%H_%M_%S", time_info);
 
     return strcat(time_string, ".log");
 }
 
 char* get_time_for_log(time_t time) {
-    char* time_string = calloc(TIME_FILE_FORMAT_SIZE, sizeof(char));
+    char* time_string = calloc(STRING_TIME_SIZE, sizeof(char));
 
     if (time_string == NULL) {
         printf(RED "Not enough memory to get log time.");
@@ -59,7 +74,7 @@ char* get_time_for_log(time_t time) {
 char* create_log_message(const char* tag, const char* messageType, const char* message) {
     char* current_time = get_time_for_log(get_current_time());
 
-    char* finalMessage = calloc(strlen(messageType) + strlen(message) + strlen(current_time) + strlen(tag), sizeof(char));
+    char* finalMessage = calloc(strlen(messageType) + strlen(message) + strlen(current_time) + strlen(tag) + 5, sizeof(char));
 
     strcat(finalMessage, "[");
     strcat(finalMessage, current_time);
@@ -85,24 +100,48 @@ logger* logger_create(const char* tag, const char* directory) {
         return NULL;
     }
 
+    char* logs_folder_name = get_logs_folder_name(get_current_time());
     char* time = get_logs_file_name(get_current_time());
 
-    char* directoryWithLogFile = calloc(strlen(directory) + strlen(time) + 2, sizeof(char));
+    char* logs_folder = calloc(strlen(directory) + strlen(logs_folder_name) + 1, sizeof(char));
 
-    mkdir_p((wchar_t*)directory, S_IRWXU);
+    if (logs_folder == NULL) {
+        printf(RED "Not enough memory to create a logger.");
+        printf(STANDART);
+        
+        return NULL;
+    }
 
-    printf(directoryWithLogFile);
+    strcat(logs_folder, directory);
+    strcat(logs_folder, "\\");
+    strcat(logs_folder, logs_folder_name);
 
-    strcat(directoryWithLogFile, L"\\");
-    strcat(directoryWithLogFile, directory);
-    strcat(directoryWithLogFile, L"\\");
-    strcat(directoryWithLogFile, time);
+    utilities_create_directories(logs_folder);
+
+    char* directory_with_log_file = calloc(strlen(logs_folder) + strlen(time) + 1, sizeof(char));
+
+    if (directory_with_log_file == NULL) {
+        printf(RED "Not enough memory to create a logger.");
+        printf(STANDART);
+        
+        return NULL;
+    }
+
+    strcat(directory_with_log_file, logs_folder);
+    strcat(directory_with_log_file, "\\");
+    strcat(directory_with_log_file, time);
 
     instance->tag = tag;
-    instance->directory = directoryWithLogFile;
+    instance->directory = directory_with_log_file;
     instance->file = fopen(instance->directory, "a");
 
+    if (!instance->file) {
+        printf("e");
+    }
+
     free(time);
+    free(logs_folder);
+    free(logs_folder_name);
 
     return instance;
 }
@@ -112,7 +151,7 @@ void logger_message(logger* logger, const char* message, color color) {
 
     printf(getColor(color));
     printf(result);
-    printf(standart);
+    printf(STANDART);
 
     fprintf(logger->file, result);
 }

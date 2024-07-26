@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <direct.h>
 #include "server.h"
 #include "..\logger\enums\color.h"
 #include "..\logger\logger.h"
@@ -30,17 +31,13 @@ server* server_create(const char* id, unsigned int port) {
         return NULL;
     }
 
-    char* logsDirectory = calloc(strlen(directory) + strlen(id) + 7, sizeof(char));
+    char* logsDirectory = calloc(strlen(directory) + strlen(id) + 15, sizeof(char));
 
     strcat(logsDirectory, directory);
-    strcat(logsDirectory, "\\");
+    strcat(logsDirectory, "\\servers\\");
     strcat(logsDirectory, id);
     strcat(logsDirectory, "\\");
     strcat(logsDirectory, "logs");
-
-    printf(logsDirectory);
-
-    memmove(logsDirectory, logsDirectory, strlen(logsDirectory));
 
     logger* logger = logger_create("SERVER", logsDirectory);
 

@@ -1,1 +1,3 @@
-bool create_directory(const char* directory);
+#pragma once
+
+void utilities_create_directories(const char* directory);
